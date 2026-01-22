@@ -47,11 +47,10 @@ def deploy_agent(project_id: str, location: str, agent_name: str,
     print(f"\n📦 Creating Agent Engine instance...")
     try:
         agent_engine = agent_engines.AgentEngine.create(
-            source_code=root_agent,
+            agent_engine=root_agent,
             display_name=agent_name,
             description=f"ADK Agent deployed via CI/CD ({agent_name})",
             requirements=requirements,
-            agent_framework="google-adk",
             location=location
         )
         
