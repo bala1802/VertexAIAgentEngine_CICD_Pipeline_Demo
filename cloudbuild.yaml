@@ -36,7 +36,7 @@ steps:
         echo "Agent Name: adk-agent-${SHORT_SHA}"
 
 options:
-  serviceAccount: projects/$PROJECT_ID/serviceAccounts/cloud-build-agent-deployer@$PROJECT_ID.iam.gserviceaccount.com
   logging: CLOUD_LOGGING_ONLY
 
 timeout: '3600s'
+serviceAccount: projects/$PROJECT_ID/serviceAccounts/cloud-build-agent-deployer@$PROJECT_ID.iam.gserviceaccount.com
