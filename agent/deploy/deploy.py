@@ -1,11 +1,13 @@
+"""Deployment script for ADK agent to Vertex AI Agent Engine."""
+
 import argparse
 import sys
+import os
 from pathlib import Path
 import vertexai
 from vertexai import agent_engines
 
-
-def deploy_agent(project_id: str, location: str, agent_name: str, 
+def deploy_agent(project_id: str, location: str, agent_name: str,
                  staging_bucket: str = None):
     """Deploy ADK agent to Vertex AI Agent Engine."""
     
@@ -17,35 +19,50 @@ def deploy_agent(project_id: str, location: str, agent_name: str,
     # Initialize Vertex AI
     vertexai.init(project=project_id, location=location)
     
+    # Add repository root to Python path
+    repo_root = Path(__file__).parent.parent.parent
+    sys.path.insert(0, str(repo_root))
+    
+    print(f"\n📥 Importing agent...")
+    print(f"   Repo root: {repo_root}")
+    
     # Import root agent from agent module
-    sys.path.insert(0, str(Path(__file__).parent.parent))
     from agent.agent import root_agent
     
-    # Read requirements
-    requirements_file = Path(__file__).parent.parent / "requirements.txt"
+    print(f"   ✅ Agent imported: {root_agent}")
+    
+    # Read requirements from repo root
+    requirements_file = repo_root / "requirements.txt"
     requirements = None
     if requirements_file.exists():
+        print(f"\n📦 Loading requirements from: {requirements_file}")
         with open(requirements_file) as f:
-            requirements = [line.strip() for line in f if line.strip() 
+            requirements = [line.strip() for line in f if line.strip()
                           and not line.startswith("#")]
+        print(f"   Found {len(requirements)} requirements")
+    else:
+        print(f"   ⚠️  No requirements.txt found at {requirements_file}")
     
     # Create agent engine instance
     print(f"\n📦 Creating Agent Engine instance...")
-    agent_engine = agent_engines.AgentEngine.create(
-        source_code=root_agent,
-        display_name=agent_name,
-        description=f"ADK Agent deployed via CI/CD ({agent_name})",
-        requirements=requirements,
-        agent_framework="google-adk",
-        location=location
-    )
-    
-    print(f"\n✅ Deployment successful!")
-    print(f"   Resource: {agent_engine.resource_name}")
-    print(f"   Display Name: {agent_engine.display_name}")
-    
-    return agent_engine
-
+    try:
+        agent_engine = agent_engines.AgentEngine.create(
+            source_code=root_agent,
+            display_name=agent_name,
+            description=f"ADK Agent deployed via CI/CD ({agent_name})",
+            requirements=requirements,
+            agent_framework="google-adk",
+            location=location
+        )
+        
+        print(f"\n✅ Deployment successful!")
+        print(f"   Resource: {agent_engine.resource_name}")
+        print(f"   Display Name: {agent_engine.display_name}")
+        
+        return agent_engine
+    except Exception as e:
+        print(f"\n❌ Agent Engine creation failed: {str(e)}")
+        raise
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Deploy ADK agent to Agent Engine")
@@ -65,4 +82,6 @@ if __name__ == "__main__":
         )
     except Exception as e:
         print(f"❌ Deployment failed: {str(e)}")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
