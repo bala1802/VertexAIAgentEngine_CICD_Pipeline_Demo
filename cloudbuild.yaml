@@ -1,0 +1,43 @@
+steps:
+  # Step 1: Run linting and tests
+  - name: gcr.io/cloud-builders/python
+    id: test
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        pip install -q -r requirements.txt
+        python -m pytest tests/ -v --tb=short
+    env:
+      - 'PROJECT_ID=$PROJECT_ID'
+
+  # Step 2: Deploy to Agent Engine
+  - name: gcr.io/cloud-builders/python
+    id: deploy
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        pip install -q -r requirements.txt
+        python deploy/deploy.py \
+          --project-id=$PROJECT_ID \
+          --location=us-central1 \
+          --agent-name=adk-agent-${SHORT_SHA}
+    env:
+      - 'PROJECT_ID=$PROJECT_ID'
+    serviceAccountEmail: cloud-build-agent-deployer@$PROJECT_ID.iam.gserviceaccount.com
+
+  # Step 3: Log deployment
+  - name: gcr.io/cloud-builders/gke-deploy
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "✅ Deployment completed for commit ${SHORT_SHA}"
+        echo "Agent Name: adk-agent-${SHORT_SHA}"
+
+options:
+  serviceAccount: projects/$PROJECT_ID/serviceAccounts/cloud-build-agent-deployer@$PROJECT_ID.iam.gserviceaccount.com
+  logging: CLOUD_LOGGING_ONLY
+
+timeout: '3600s'
