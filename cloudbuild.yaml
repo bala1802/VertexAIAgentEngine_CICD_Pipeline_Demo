@@ -25,6 +25,7 @@ steps:
           --agent-name=adk-agent-${SHORT_SHA}
     env:
       - 'PROJECT_ID=$PROJECT_ID'
+    serviceAccountEmail: cloud-build-agent-deployer@$PROJECT_ID.iam.gserviceaccount.com
 
   # Step 3: Log deployment
   - name: gcr.io/cloud-builders/gke-deploy
@@ -36,7 +37,7 @@ steps:
         echo "Agent Name: adk-agent-${SHORT_SHA}"
 
 options:
+  serviceAccount: projects/$PROJECT_ID/serviceAccounts/cloud-build-agent-deployer@$PROJECT_ID.iam.gserviceaccount.com
   logging: CLOUD_LOGGING_ONLY
 
 timeout: '3600s'
-serviceAccount: projects/$PROJECT_ID/serviceAccounts/cloud-build-agent-deployer@$PROJECT_ID.iam.gserviceaccount.com
