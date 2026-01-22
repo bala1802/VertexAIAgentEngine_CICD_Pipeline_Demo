@@ -2,7 +2,7 @@ serviceAccount: projects/$PROJECT_ID/serviceAccounts/cloud-build-agent-deployer@
 
 steps:
   # Step 1: Run linting and tests
-  - name: gcr.io/cloud-builders/python
+  - name: gcr.io/cloud-builders/python:3.11
     id: test
     entrypoint: bash
     args:
@@ -14,7 +14,7 @@ steps:
       - 'PROJECT_ID=$PROJECT_ID'
 
   # Step 2: Deploy to Agent Engine
-  - name: gcr.io/cloud-builders/python
+  - name: gcr.io/cloud-builders/python:3.11
     id: deploy
     entrypoint: bash
     args:
