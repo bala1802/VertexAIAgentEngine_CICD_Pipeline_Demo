@@ -25,7 +25,6 @@ steps:
           --agent-name=adk-agent-${SHORT_SHA}
     env:
       - 'PROJECT_ID=$PROJECT_ID'
-    serviceAccountEmail: cloud-build-agent-deployer@$PROJECT_ID.iam.gserviceaccount.com
 
   # Step 3: Log deployment
   - name: gcr.io/cloud-builders/gke-deploy
