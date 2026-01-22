@@ -1,3 +1,5 @@
+serviceAccount: projects/$PROJECT_ID/serviceAccounts/cloud-build-agent-deployer@$PROJECT_ID.iam.gserviceaccount.com
+
 steps:
   # Step 1: Run linting and tests
   - name: gcr.io/cloud-builders/python
@@ -28,7 +30,7 @@ steps:
 
   # Step 3: Log deployment
   - name: gcr.io/cloud-builders/gke-deploy
-    entrypoint: 'bash'
+    entrypoint: bash
     args:
       - '-c'
       - |
@@ -36,7 +38,6 @@ steps:
         echo "Agent Name: adk-agent-${SHORT_SHA}"
 
 options:
-  serviceAccount: projects/$PROJECT_ID/serviceAccounts/cloud-build-agent-deployer@$PROJECT_ID.iam.gserviceaccount.com
   logging: CLOUD_LOGGING_ONLY
 
 timeout: '3600s'
