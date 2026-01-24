@@ -220,3 +220,4 @@ venv/
 node_modules/
 
 pyenv shell 3.11.8/
+logs/

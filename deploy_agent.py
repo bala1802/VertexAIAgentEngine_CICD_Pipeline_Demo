@@ -157,8 +157,8 @@ def main():
         print("🔖 Resource Name:")
         print(remote_agent.resource_name)
 
-        print("\n📋 Full Agent Metadata:")
-        print(remote_agent.to_dict())
+        # print("\n📋 Full Agent Metadata:")
+        # print(remote_agent.to_dict())
 
         print("\n🎉 Deployment finished successfully!")
 
