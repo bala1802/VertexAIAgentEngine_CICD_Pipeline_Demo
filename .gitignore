@@ -218,3 +218,5 @@ venv/
 *.log
 .DS_Store
 node_modules/
+
+pyenv shell 3.11.8/
