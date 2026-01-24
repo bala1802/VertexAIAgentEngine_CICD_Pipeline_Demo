@@ -96,7 +96,7 @@ def main():
         print("=" * 90)
 
         extra_packages = [
-            "user_src_dir",                           # your source dir
+            "agent",                           # your source dir
             "installation_scripts/install_package.sh"
         ]
 
