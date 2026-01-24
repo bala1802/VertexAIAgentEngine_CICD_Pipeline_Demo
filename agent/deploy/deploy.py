@@ -1,1 +1,0 @@
-"""Deployment script for ADK agent to Vertex AI Agent Engine."""
