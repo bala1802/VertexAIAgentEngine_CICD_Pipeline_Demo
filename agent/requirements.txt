@@ -1,0 +1,6 @@
+google-cloud-logging
+python-dotenv
+pytest
+pytest-asyncio
+google-cloud-aiplatform>=1.46.0
+google-adk==1.23.0

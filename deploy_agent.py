@@ -35,13 +35,9 @@ try:
     from vertexai.agent_engines import AgentEngine
     print("✅ vertexai imports successful")
 
-    # print("📦 Importing local_agent from user_src_dir.main...")
-    # from user_src_dir.main import local_agent
-    # print("✅ local_agent import successful")
-
-    print("📦 Importing local_agent from user_src_dir.main...")
-    from user_src_dir.main import root_agent
-    print("✅ local_agent import successful")
+    print("\n📦 Importing agent...")
+    from agent.agent import root_agent
+    print("✅ agent import successful")
 
 except Exception as e:
     print("❌ Import failure detected")
@@ -84,7 +80,7 @@ def main():
         print("📦 Step 2: Resolving requirements")
         print("=" * 90)
 
-        requirements = "user_src_dir/requirements.txt"
+        requirements = "agent/requirements.txt"
         requirements_path = REPO_ROOT / requirements
 
         print(f"📄 requirements (string)     : {requirements}")
