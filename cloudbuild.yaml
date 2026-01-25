@@ -1,42 +1,18 @@
-serviceAccount: projects/$PROJECT_ID/serviceAccounts/cloud-build-agent-deployer@$PROJECT_ID.iam.gserviceaccount.com
-
 steps:
-  # Step 1: Run linting and tests
-  - name: python:3.12-slim
-    id: test
-    entrypoint: bash
-    args:
-      - -c
-      - |
-        pip install -q -r requirements.txt
+  # Step 1: Install Python dependencies
+  - name: 'python:3.12'
+    entrypoint: 'pip'
+    args: ['install', '-r', 'agent/requirements.txt', '--user']
+    
+  # Step 2: Deploy agent to Vertex AI Agent Engine
+  - name: 'python:3.12'
+    entrypoint: 'python'
+    args: ['deploy_agent.py']
     env:
-      - 'PROJECT_ID=$PROJECT_ID'
-
-  # Step 2: Deploy to Agent Engine
-  - name: python:3.12-slim
-    id: deploy
-    entrypoint: bash
-    args:
-      - -c
-      - |
-        pip install -q -r requirements.txt
-        python agent/deploy/deploy.py \
-          --project-id=$PROJECT_ID \
-          --location=us-central1 \
-          --agent-name=adk-agent-${SHORT_SHA}
-    env:
-      - 'PROJECT_ID=$PROJECT_ID'
-
-  # Step 3: Log deployment
-  - name: gcr.io/cloud-builders/gke-deploy
-    entrypoint: bash
-    args:
-      - '-c'
-      - |
-        echo "✅ Deployment completed for commit ${SHORT_SHA}"
-        echo "Agent Name: adk-agent-${SHORT_SHA}"
+      - 'PYTHONUNBUFFERED=1'
 
 options:
   logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_8'
 
-timeout: '3600s'
+timeout: '1800s'  # 30 minutes

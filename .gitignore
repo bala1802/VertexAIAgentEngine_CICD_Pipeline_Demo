@@ -218,3 +218,8 @@ venv/
 *.log
 .DS_Store
 node_modules/
+
+pyenv shell 3.11.8/
+logs/
+all_code.txt
+code_extraction.py
