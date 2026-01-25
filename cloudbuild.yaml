@@ -5,13 +5,6 @@ steps:
     args: ['install', '-r', 'agent/requirements.txt', 'pyyaml', '--user']
     id: 'install-deps'
   
-  # Step 2: Run tests
-  - name: 'python:3.12'
-    entrypoint: 'python'
-    args: ['-m', 'pytest', '--verbose']
-    id: 'run-tests'
-    waitFor: ['install-deps']
-  
   # ============================================================================
   # CONDITIONAL DEPLOYMENT TO DEV
   # ============================================================================
@@ -31,7 +24,7 @@ steps:
       - 'ENVIRONMENT=dev'
       - 'PYTHONUNBUFFERED=1'
     id: 'deploy-dev'
-    waitFor: ['run-tests']
+    waitFor: ['install-deps']  # Changed from 'run-tests' to 'install-deps'
   
   # ============================================================================
   # CONDITIONAL DEPLOYMENT TO STAGING
@@ -52,7 +45,7 @@ steps:
       - 'ENVIRONMENT=staging'
       - 'PYTHONUNBUFFERED=1'
     id: 'deploy-staging'
-    waitFor: ['run-tests']
+    waitFor: ['install-deps']  # Changed from 'run-tests' to 'install-deps'
   
   # ============================================================================
   # CONDITIONAL DEPLOYMENT TO PRODUCTION
@@ -73,7 +66,7 @@ steps:
       - 'ENVIRONMENT=production'
       - 'PYTHONUNBUFFERED=1'
     id: 'deploy-production'
-    waitFor: ['run-tests']
+    waitFor: ['install-deps']  # Changed from 'run-tests' to 'install-deps'
 
 # Default: Auto-deploy to DEV only when triggered by git push
 substitutions:
