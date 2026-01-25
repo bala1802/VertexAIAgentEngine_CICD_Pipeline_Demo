@@ -71,8 +71,8 @@ steps:
 # Default: Auto-deploy to DEV only when triggered by git push
 substitutions:
   _DEPLOY_TO_DEV: 'true'
-  _DEPLOY_TO_STAGING: 'false'
-  _DEPLOY_TO_PRODUCTION: 'false'
+  _DEPLOY_TO_STAGING: 'true'
+  _DEPLOY_TO_PRODUCTION: 'true'
 
 options:
   logging: CLOUD_LOGGING_ONLY
