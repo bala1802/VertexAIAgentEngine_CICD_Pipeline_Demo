@@ -15,11 +15,11 @@ print("=" * 90)
 REPO_ROOT = Path(__file__).parent
 print(f"📁 REPO_ROOT resolved to: {REPO_ROOT}")
 
-USER_SRC_PATH = REPO_ROOT / "agent"
-print(f"📁 USER_SRC_PATH resolved to: {USER_SRC_PATH}")
+AGENT_SRC_PATH = REPO_ROOT / "agent"
+print(f"📁 AGENT_SRC_PATH resolved to: {AGENT_SRC_PATH}")
 
-sys.path.append(str(USER_SRC_PATH))
-print(f"✅ Added to sys.path: {USER_SRC_PATH}")
+sys.path.append(str(AGENT_SRC_PATH))
+print(f"✅ Added to sys.path: {AGENT_SRC_PATH}")
 
 print("🔎 Current sys.path:")
 for idx, p in enumerate(sys.path):
