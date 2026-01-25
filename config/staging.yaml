@@ -1,0 +1,11 @@
+environment: staging
+gcp:
+  project_id: agentops-end-to-end
+  location: us-central1
+  staging_bucket: gs://agentops-end-to-end-agent-staging
+agent:
+  display_name: content-creation-agent-staging
+  description: Staging environment for Content Creation agent
+  min_instances: 0
+  max_instances: 2
+  container_concurrency: 2
