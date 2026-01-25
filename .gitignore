@@ -225,3 +225,6 @@ all_code.txt
 code_extraction.py
 structure.txt
 backup/
+*.drawio
+*.html
+test_agent.py
