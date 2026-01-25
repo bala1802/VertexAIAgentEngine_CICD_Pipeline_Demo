@@ -3,6 +3,11 @@
 ![Status](https://img.shields.io/badge/status-active-brightgreen)
 ![Python Version](https://img.shields.io/badge/python-3.12-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
+![GCP](https://img.shields.io/badge/GCP-Google%20Cloud-blue)
+![Vertex AI Agent Engine](https://img.shields.io/badge/Vertex%20AI-Agent%20Engine-orange)
+![CI/CD Pipeline](https://img.shields.io/badge/CI%2FCD-Pipeline-success)
+![Gemini](https://img.shields.io/badge/Gemini-2.5%20Flash-purple)
+
 
 A production-ready **CI/CD pipeline** for deploying **Google Vertex AI Agent Engine** applications using **Google Cloud Build**. This repository demonstrates best practices for automated deployment across dev, staging, and production environments with multi-agent orchestration.
 
