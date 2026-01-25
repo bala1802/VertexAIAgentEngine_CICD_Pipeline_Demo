@@ -1,3 +1,4 @@
+import os
 import sys
 import traceback
 from pathlib import Path
@@ -9,21 +10,44 @@ print(f"🕒 Timestamp (UTC): {datetime.utcnow().isoformat()}")
 print("=" * 90)
 
 # ------------------------------------------------------------------------------
+# Configuration from environment variables
+# ------------------------------------------------------------------------------
+
+PROJECT_ID = os.getenv("GCP_PROJECT_ID", "agentops-end-to-end")
+LOCATION = os.getenv("GCP_LOCATION", "us-central1")
+STAGING_BUCKET = os.getenv("GCP_STAGING_BUCKET", "gs://agentops-end-to-end-agent-staging")
+
+# Agent configuration
+AGENT_DISPLAY_NAME = os.getenv("AGENT_DISPLAY_NAME", "content-creation-agent-engine-demo")
+AGENT_DESCRIPTION = os.getenv("AGENT_DESCRIPTION", "Simple Content Creation agent using AgentEngine and Queryable.")
+MIN_INSTANCES = int(os.getenv("AGENT_MIN_INSTANCES", "0"))
+MAX_INSTANCES = int(os.getenv("AGENT_MAX_INSTANCES", "1"))
+CONTAINER_CONCURRENCY = int(os.getenv("AGENT_CONTAINER_CONCURRENCY", "1"))
+
+# Path configuration
+REPO_ROOT = Path(__file__).parent
+AGENT_SRC_PATH = REPO_ROOT / os.getenv("AGENT_SOURCE_DIR", "agent")
+REQUIREMENTS_FILE = os.getenv("REQUIREMENTS_FILE", "agent/requirements.txt")
+EXTRA_PACKAGES = os.getenv("EXTRA_PACKAGES", "agent,installation_scripts/install_package.sh").split(",")
+
+print("\n⚙️ Configuration")
+print(f"   - PROJECT_ID              = {PROJECT_ID}")
+print(f"   - LOCATION                = {LOCATION}")
+print(f"   - STAGING_BUCKET          = {STAGING_BUCKET}")
+print(f"   - AGENT_DISPLAY_NAME      = {AGENT_DISPLAY_NAME}")
+print(f"   - MIN_INSTANCES           = {MIN_INSTANCES}")
+print(f"   - MAX_INSTANCES           = {MAX_INSTANCES}")
+print(f"   - CONTAINER_CONCURRENCY   = {CONTAINER_CONCURRENCY}")
+print(f"   - AGENT_SRC_PATH          = {AGENT_SRC_PATH}")
+print(f"   - REQUIREMENTS_FILE       = {REQUIREMENTS_FILE}")
+print(f"   - EXTRA_PACKAGES          = {EXTRA_PACKAGES}")
+
+# ------------------------------------------------------------------------------
 # Path setup
 # ------------------------------------------------------------------------------
 
-REPO_ROOT = Path(__file__).parent
-print(f"📁 REPO_ROOT resolved to: {REPO_ROOT}")
-
-AGENT_SRC_PATH = REPO_ROOT / "agent"
-print(f"📁 AGENT_SRC_PATH resolved to: {AGENT_SRC_PATH}")
-
 sys.path.append(str(AGENT_SRC_PATH))
-print(f"✅ Added to sys.path: {AGENT_SRC_PATH}")
-
-print("🔎 Current sys.path:")
-for idx, p in enumerate(sys.path):
-    print(f"   [{idx}] {p}")
+print(f"\n✅ Added to sys.path: {AGENT_SRC_PATH}")
 
 # ------------------------------------------------------------------------------
 # Imports
@@ -45,19 +69,6 @@ except Exception as e:
     raise
 
 # ------------------------------------------------------------------------------
-# Configuration
-# ------------------------------------------------------------------------------
-
-PROJECT_ID = "agentops-end-to-end"
-LOCATION = "us-central1"
-STAGING_BUCKET = "gs://agentops-end-to-end-agent-staging"
-
-print("\n⚙️ Configuration")
-print(f"   - PROJECT_ID     = {PROJECT_ID}")
-print(f"   - LOCATION       = {LOCATION}")
-print(f"   - STAGING_BUCKET = {STAGING_BUCKET}")
-
-# ------------------------------------------------------------------------------
 # Main
 # ------------------------------------------------------------------------------
 
@@ -67,7 +78,6 @@ def main():
         print("🧩 Step 1: Initializing Vertex AI")
         print("=" * 90)
 
-        print("➡️ Calling vertexai.init(...)")
         vertexai.init(
             project=PROJECT_ID,
             location=LOCATION,
@@ -80,12 +90,9 @@ def main():
         print("📦 Step 2: Resolving requirements")
         print("=" * 90)
 
-        requirements = "agent/requirements.txt"
-        requirements_path = REPO_ROOT / requirements
-
-        print(f"📄 requirements (string)     : {requirements}")
-        print(f"📄 requirements (full path)  : {requirements_path}")
-        print(f"📄 Exists?                   : {requirements_path.exists()}")
+        requirements_path = REPO_ROOT / REQUIREMENTS_FILE
+        print(f"📄 requirements: {requirements_path}")
+        print(f"📄 Exists?     : {requirements_path.exists()}")
 
         if not requirements_path.exists():
             raise FileNotFoundError(f"requirements.txt not found: {requirements_path}")
@@ -95,16 +102,11 @@ def main():
         print("📦 Step 3: Validating extra_packages")
         print("=" * 90)
 
-        extra_packages = [
-            "agent",                           # your source dir
-            "installation_scripts/install_package.sh"
-        ]
-
-        for pkg in extra_packages:
-            pkg_path = REPO_ROOT / pkg
-            print(f"📁 Extra package entry : {pkg}")
-            print(f"   - Resolved path     : {pkg_path}")
-            print(f"   - Exists?           : {pkg_path.exists()}")
+        for pkg in EXTRA_PACKAGES:
+            pkg_path = REPO_ROOT / pkg.strip()
+            print(f"📁 Extra package: {pkg.strip()}")
+            print(f"   - Path  : {pkg_path}")
+            print(f"   - Exists: {pkg_path.exists()}")
 
             if not pkg_path.exists():
                 raise FileNotFoundError(f"Extra package not found: {pkg_path}")
@@ -130,21 +132,17 @@ def main():
         print("=" * 90)
 
         print("⏳ Submitting AgentEngine.create(...)")
-        print("   - display_name          : echo-agent-engine-demo")
-        print("   - min_instances         : 0")
-        print("   - max_instances         : 1")
-        print("   - container_concurrency : 1")
 
         remote_agent = AgentEngine.create(
             agent_engine=root_agent,
-            display_name="content-creation-agent-engine-demo",
-            description="Simple Content Creation agent using AgentEngine and Queryable.",
-            requirements=requirements,
-            extra_packages=extra_packages,
+            display_name=AGENT_DISPLAY_NAME,
+            description=AGENT_DESCRIPTION,
+            requirements=REQUIREMENTS_FILE,
+            extra_packages=EXTRA_PACKAGES,
             build_options=build_options,
-            min_instances=0,
-            max_instances=1,
-            container_concurrency=1,
+            min_instances=MIN_INSTANCES,
+            max_instances=MAX_INSTANCES,
+            container_concurrency=CONTAINER_CONCURRENCY,
         )
 
         print("✅ AgentEngine.create() completed successfully")
@@ -156,9 +154,6 @@ def main():
 
         print("🔖 Resource Name:")
         print(remote_agent.resource_name)
-
-        # print("\n📋 Full Agent Metadata:")
-        # print(remote_agent.to_dict())
 
         print("\n🎉 Deployment finished successfully!")
 

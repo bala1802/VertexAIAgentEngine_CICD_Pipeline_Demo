@@ -9,10 +9,46 @@ steps:
     entrypoint: 'python'
     args: ['deploy_agent.py']
     env:
+      # GCP Configuration (using Cloud Build's built-in substitutions)
+      - 'GCP_PROJECT_ID=$PROJECT_ID'
+      - 'GCP_LOCATION=${_DEPLOYMENT_REGION}'
+      - 'GCP_STAGING_BUCKET=${_STAGING_BUCKET}'
+      
+      # Agent Configuration
+      - 'AGENT_DISPLAY_NAME=${_AGENT_NAME}'
+      - 'AGENT_DESCRIPTION=${_AGENT_DESCRIPTION}'
+      - 'AGENT_MIN_INSTANCES=${_MIN_INSTANCES}'
+      - 'AGENT_MAX_INSTANCES=${_MAX_INSTANCES}'
+      - 'AGENT_CONTAINER_CONCURRENCY=${_CONTAINER_CONCURRENCY}'
+      
+      # Path Configuration (optional overrides)
+      - 'AGENT_SOURCE_DIR=${_AGENT_SOURCE_DIR}'
+      - 'REQUIREMENTS_FILE=${_REQUIREMENTS_FILE}'
+      - 'EXTRA_PACKAGES=${_EXTRA_PACKAGES}'
+      
+      # Unbuffered output for real-time logs
       - 'PYTHONUNBUFFERED=1'
+
+# Define custom substitution variables with defaults
+substitutions:
+  # GCP Configuration
+  _DEPLOYMENT_REGION: 'us-central1'
+  _STAGING_BUCKET: 'gs://agentops-end-to-end-agent-staging'
+  
+  # Agent Configuration
+  _AGENT_NAME: 'content-creation-agent-engine-demo'
+  _AGENT_DESCRIPTION: 'Simple Content Creation agent using AgentEngine and Queryable.'
+  _MIN_INSTANCES: '0'
+  _MAX_INSTANCES: '1'
+  _CONTAINER_CONCURRENCY: '1'
+  
+  # Path Configuration
+  _AGENT_SOURCE_DIR: 'agent'
+  _REQUIREMENTS_FILE: 'agent/requirements.txt'
+  _EXTRA_PACKAGES: 'agent,installation_scripts/install_package.sh'
 
 options:
   logging: CLOUD_LOGGING_ONLY
   machineType: 'E2_HIGHCPU_8'
 
-timeout: '1800s'  # 30 minutes
+timeout: '1800s'
