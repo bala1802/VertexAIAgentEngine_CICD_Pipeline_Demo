@@ -1,0 +1,11 @@
+environment: production
+gcp:
+  project_id: agentops-end-to-end
+  location: us-central1
+  staging_bucket: gs://agentops-end-to-end-agent-staging
+agent:
+  display_name: content-creation-agent-production
+  description: Production Content Creation agent
+  min_instances: 1
+  max_instances: 5
+  container_concurrency: 4

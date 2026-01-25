@@ -1,54 +1,88 @@
 steps:
-  # Step 1: Install Python dependencies
+  # Step 1: Install dependencies
   - name: 'python:3.12'
     entrypoint: 'pip'
-    args: ['install', '-r', 'agent/requirements.txt', '--user']
-    
-  # Step 2: Deploy agent to Vertex AI Agent Engine
+    args: ['install', '-r', 'agent/requirements.txt', 'pyyaml', '--user']
+    id: 'install-deps'
+  
+  # Step 2: Run tests
   - name: 'python:3.12'
     entrypoint: 'python'
-    args: ['deploy_agent.py']
+    args: ['-m', 'pytest', '--verbose']
+    id: 'run-tests'
+    waitFor: ['install-deps']
+  
+  # ============================================================================
+  # CONDITIONAL DEPLOYMENT TO DEV
+  # ============================================================================
+  - name: 'python:3.12'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        if [ "${_DEPLOY_TO_DEV}" = "true" ]; then
+          echo "🚀 Deploying to DEV environment..."
+          python deploy_agent.py
+          echo "✅ DEV deployment completed"
+        else
+          echo "⏭️  Skipping DEV deployment"
+        fi
     env:
-      # GCP Configuration (using Cloud Build's built-in substitutions)
-      - 'GCP_PROJECT_ID=$PROJECT_ID'
-      - 'GCP_LOCATION=${_DEPLOYMENT_REGION}'
-      - 'GCP_STAGING_BUCKET=${_STAGING_BUCKET}'
-      
-      # Agent Configuration
-      - 'AGENT_DISPLAY_NAME=${_AGENT_NAME}'
-      - 'AGENT_DESCRIPTION=${_AGENT_DESCRIPTION}'
-      - 'AGENT_MIN_INSTANCES=${_MIN_INSTANCES}'
-      - 'AGENT_MAX_INSTANCES=${_MAX_INSTANCES}'
-      - 'AGENT_CONTAINER_CONCURRENCY=${_CONTAINER_CONCURRENCY}'
-      
-      # Path Configuration (optional overrides)
-      - 'AGENT_SOURCE_DIR=${_AGENT_SOURCE_DIR}'
-      - 'REQUIREMENTS_FILE=${_REQUIREMENTS_FILE}'
-      - 'EXTRA_PACKAGES=${_EXTRA_PACKAGES}'
-      
-      # Unbuffered output for real-time logs
+      - 'ENVIRONMENT=dev'
       - 'PYTHONUNBUFFERED=1'
+    id: 'deploy-dev'
+    waitFor: ['run-tests']
+  
+  # ============================================================================
+  # CONDITIONAL DEPLOYMENT TO STAGING
+  # ============================================================================
+  - name: 'python:3.12'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        if [ "${_DEPLOY_TO_STAGING}" = "true" ]; then
+          echo "🚀 Deploying to STAGING environment..."
+          python deploy_agent.py
+          echo "✅ STAGING deployment completed"
+        else
+          echo "⏭️  Skipping STAGING deployment"
+        fi
+    env:
+      - 'ENVIRONMENT=staging'
+      - 'PYTHONUNBUFFERED=1'
+    id: 'deploy-staging'
+    waitFor: ['run-tests']
+  
+  # ============================================================================
+  # CONDITIONAL DEPLOYMENT TO PRODUCTION
+  # ============================================================================
+  - name: 'python:3.12'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        if [ "${_DEPLOY_TO_PRODUCTION}" = "true" ]; then
+          echo "🚀 Deploying to PRODUCTION environment..."
+          python deploy_agent.py
+          echo "✅ PRODUCTION deployment completed"
+        else
+          echo "⏭️  Skipping PRODUCTION deployment"
+        fi
+    env:
+      - 'ENVIRONMENT=production'
+      - 'PYTHONUNBUFFERED=1'
+    id: 'deploy-production'
+    waitFor: ['run-tests']
 
-# Define custom substitution variables with defaults
+# Default: Auto-deploy to DEV only when triggered by git push
 substitutions:
-  # GCP Configuration
-  _DEPLOYMENT_REGION: 'us-central1'
-  _STAGING_BUCKET: 'gs://agentops-end-to-end-agent-staging'
-  
-  # Agent Configuration
-  _AGENT_NAME: 'content-creation-agent-engine-demo'
-  _AGENT_DESCRIPTION: 'Simple Content Creation agent using AgentEngine and Queryable.'
-  _MIN_INSTANCES: '0'
-  _MAX_INSTANCES: '1'
-  _CONTAINER_CONCURRENCY: '1'
-  
-  # Path Configuration
-  _AGENT_SOURCE_DIR: 'agent'
-  _REQUIREMENTS_FILE: 'agent/requirements.txt'
-  _EXTRA_PACKAGES: 'agent,installation_scripts/install_package.sh'
+  _DEPLOY_TO_DEV: 'true'
+  _DEPLOY_TO_STAGING: 'false'
+  _DEPLOY_TO_PRODUCTION: 'false'
 
 options:
   logging: CLOUD_LOGGING_ONLY
   machineType: 'E2_HIGHCPU_8'
 
-timeout: '1800s'
+timeout: '3600s'
