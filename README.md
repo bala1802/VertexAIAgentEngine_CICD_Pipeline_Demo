@@ -22,7 +22,6 @@ A production-ready **CI/CD pipeline** for deploying **Google Vertex AI Agent Eng
 - [✨ Features](#-features)
 - [📋 Prerequisites](#-prerequisites)
 - [🚀 Quick Start](#-quick-start)
-- [⚙️ Configuration](#-configuration)
 - [🎯 Deployment](#-deployment)
   - [Local Development](#local-development)
   - [Cloud Build Pipeline](#cloud-build-pipeline)
